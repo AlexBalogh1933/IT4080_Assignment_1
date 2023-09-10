@@ -46,7 +46,6 @@ public class NetworkHandler : NetworkBehaviour
         NetworkManager.OnClientConnectedCallback += ClientOnClientConnected;
         NetworkManager.OnClientDisconnectCallback += ClientOnClientDisconnected;
         NetworkManager.OnClientStopped += ClientOnClientStopped;
-        PrintMe();
     }
 
     // ---------------------
@@ -62,8 +61,9 @@ public class NetworkHandler : NetworkBehaviour
     }
     private void ClientOnClientDisconnected(ulong clientId)
     {
-        // print I {clientId have disconnected from the server.
-        Debug.Log($"I client {clientId} has disconnected from the server");
+        // print I {clientId} have disconnected from the server.
+        Debug.Log($"I client {NetworkManager.LocalClientId} has disconnected from the server");
+        // Only works if you stop the playing of the game. Does not work when you shutdown Client. 
     }
     private void ClientOnClientStopped(bool indicator)
     {
