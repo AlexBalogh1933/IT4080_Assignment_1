@@ -74,9 +74,6 @@ public class NetworkHandler : NetworkBehaviour
         NetworkManager.OnClientStopped -= ClientOnClientStopped;
     }
 
-
-
-
     // ---------------------
     // Server Actions
     // ---------------------

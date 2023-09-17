@@ -7,14 +7,20 @@ public class Player : NetworkBehaviour
 {
     public float movementSpeed = 50f;
     public float rotationSpeed = 130f;
+    public NetworkVariable<Color> playerColorNetVar = new NetworkVariable<Color>(Color.red);
+    public float maxDistance = 5.0f;
 
     private Camera playerCamera;
+    private GameObject playerBody;
 
     private void Start()
     {
         playerCamera = transform.Find("Camera").GetComponent<Camera>();
         playerCamera.enabled = IsOwner;
         playerCamera.GetComponent<AudioListener>().enabled = IsOwner;
+
+        playerBody = transform.Find("PlayerBody").gameObject;
+        ApplyColor();
     }
 
     private void Update()
@@ -22,7 +28,7 @@ public class Player : NetworkBehaviour
         if (IsOwner)
         {
             OwnerHandleInput();
-        }  
+        }
     }
 
     public void OwnerHandleInput()
@@ -33,7 +39,13 @@ public class Player : NetworkBehaviour
         {
             MoveServerRpc(movement, rotation);
         }
-        
+
+    }
+
+    private void ApplyColor()
+    {
+        playerBody.GetComponent<MeshRenderer>().material.color = playerColorNetVar.Value;
+        //Debug.Log($" {playerColorNetVar.Value}");
     }
 
     [ServerRpc]
@@ -71,4 +83,5 @@ public class Player : NetworkBehaviour
 
         return moveVect;
     }
+
 }
