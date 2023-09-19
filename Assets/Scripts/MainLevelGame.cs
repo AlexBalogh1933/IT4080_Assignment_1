@@ -5,7 +5,10 @@ using Unity.Netcode;
 
 public class MainLevelGame : NetworkBehaviour
 {
-    public Player playerPrefab;
+
+    public Player PlayerHost;
+    public Player PlayerDefault;
+    //public Player playerPrefab;
     public Camera mainlevelCamera;
 
     private int positionIndex = 0;
@@ -35,6 +38,11 @@ public class MainLevelGame : NetworkBehaviour
         {
             SpawnPlayers();
         }
+        //else
+        //{
+        //    SpawnPlayers(PlayerDefault);
+        //    Debug.Log("Clients Spawn");
+        //}
     }
 
     private Vector3 NextPosition()
@@ -63,26 +71,23 @@ public class MainLevelGame : NetworkBehaviour
     {
         foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
         {
-            if (IsServer)
+            Player playerSpawn;
+            //Debug.Log("Into Spawning");
+            //Player playerSpawn = Instantiate(playerPrefab, NextPosition(), Quaternion.identity);
+            //playerSpawn.playerColorNetVar.Value = NextColor();
+            //playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+            if (IsHost && clientId == NetworkManager.LocalClientId)
             {
-                Debug.Log("Into Spawning");
-                //Player playerSpawn;
-                if (IsHost)
-                {
-                    Debug.Log("Host Spawn");
-                    Player playerSpawn = Instantiate(playerPrefab, NextPosition(), Quaternion.identity);
-                    playerSpawn.playerColorNetVar.Value = NextColor();
-                    playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-                }
-                else
-                {
-                    Debug.Log("Client Spawn");
-                    Player playerSpawn = Instantiate(playerPrefab, NextPosition(), Quaternion.identity);
-                    playerSpawn.playerColorNetVar.Value = NextColor();
-                    playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-                }
-
+                Debug.Log("Host Spawn");
+                playerSpawn = Instantiate(PlayerHost, NextPosition(), Quaternion.identity);
             }
+            else
+            {
+                Debug.Log("Client Spawn");
+                playerSpawn = Instantiate(PlayerDefault, NextPosition(), Quaternion.identity);
+            }
+            playerSpawn.playerColorNetVar.Value = NextColor();
+            playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
         }
     }
 }
