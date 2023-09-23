@@ -676,7 +676,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1187055901261856792}
-  - component: {fileID: 2709878023548559336}
+  - component: {fileID: 5097906678310120700}
   - component: {fileID: 272524729068182188}
   - component: {fileID: 2765905504098708005}
   m_Layer: 0
@@ -703,7 +703,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2709878023548559336
+--- !u!114 &5097906678310120700
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -717,7 +717,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 50
   rotationSpeed: 130
-  playerColor: {r: 1, g: 0, b: 0, a: 1}
+  playerColorNetVar:
+    m_InternalValue: {r: 1, g: 0, b: 0, a: 1}
+  maxDistance: 25
 --- !u!114 &272524729068182188
 MonoBehaviour:
   m_ObjectHideFlags: 0

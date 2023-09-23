@@ -11,6 +11,15 @@ public class MainLevelGame : NetworkBehaviour
     //public Player playerPrefab;
     public Camera mainlevelCamera;
 
+    private int colorIndex = 0;
+    private Color[] playerColors = new Color[]
+    {
+        Color.blue,
+        Color.green,
+        Color.yellow,
+        Color.magenta,
+    };
+
     private int positionIndex = 0;
     private Vector3[] startPositions = new Vector3[]
     {
@@ -20,14 +29,15 @@ public class MainLevelGame : NetworkBehaviour
         new Vector3(0, 0, -4)
     };
 
-    private int colorIndex = 0;
-    private Color[] playerColors = new Color[]
-    {
-        Color.blue,
-        Color.green,
-        Color.yellow,
-        Color.magenta,
-    };
+    //private int WrapInt(int curValue, int increment, int max)
+    //{
+    //    int toReturn = curValue + increment;
+    //    if (toReturn > max)
+    //    {
+    //        toReturn = 0;
+    //    }
+    //    return toReturn;
+    //}
 
     // Start is called before the first frame update
     void Start()
@@ -55,6 +65,14 @@ public class MainLevelGame : NetworkBehaviour
         }
         return pos;
     }
+
+    //private Color NextColor()
+    //{
+    //    Color newColor = playerColors[colorIndex];
+    //    colorIndex = WrapInt(colorIndex, 1, playerColors.Length);
+    //    return newColor;
+    //}
+
 
     private Color NextColor()
     {
@@ -88,6 +106,14 @@ public class MainLevelGame : NetworkBehaviour
             }
             playerSpawn.playerColorNetVar.Value = NextColor();
             playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+            //Player prefab = PlayerDefault;
+            //if (clientId == NetworkManager.LocalClientId)
+            //{
+            //    prefab = PlayerHost;
+            //}
+            //Player playerSpawn = Instantiate(prefab, NextPosition(), Quaternion.identity);
+            //playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+            //playerSpawn.PlayerColor.Value = NextColor();
         }
     }
 }

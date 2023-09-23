@@ -344,6 +344,7 @@ MonoBehaviour:
   rotationSpeed: 130
   playerColorNetVar:
     m_InternalValue: {r: 1, g: 0, b: 0, a: 1}
+  maxDistance: 25
 --- !u!114 &8591322912350084116
 MonoBehaviour:
   m_ObjectHideFlags: 0

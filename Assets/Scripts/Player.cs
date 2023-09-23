@@ -8,7 +8,7 @@ public class Player : NetworkBehaviour
     public float movementSpeed = 50f;
     public float rotationSpeed = 130f;
     public NetworkVariable<Color> playerColorNetVar = new NetworkVariable<Color>(Color.red);
-    public float maxDistance = 2.5f;
+    public float maxDistance = 25.0f;
 
     private Camera playerCamera;
     private GameObject playerBody;
@@ -48,7 +48,7 @@ public class Player : NetworkBehaviour
         //Debug.Log($" {playerColorNetVar.Value}");
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = true)]
     private void MoveServerRpc(Vector3 movement, Vector3 rotation)
     {
         if (IsHost && OwnerClientId == NetworkManager.LocalClientId)
@@ -64,10 +64,10 @@ public class Player : NetworkBehaviour
                 transform.Translate(movement);
                 transform.Rotate(rotation);
             }
-            //else
-            //{
-            //    Debug.Log($"Too Far");
-            //}
+            else
+            {
+                Debug.Log($"Too Far");
+            }
         }
         
     }
@@ -108,6 +108,8 @@ public class Player : NetworkBehaviour
         float minY = -maxDistance;
         float maxY = maxDistance;
 
+        //Debug.Log($"{maxDistance}");
+        //Debug.Log($"{position.x}, {position.y}");
         return position.x >= minX && position.x <= maxX && position.y >= minY && position.y <= maxY;
     }
 
