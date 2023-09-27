@@ -29,15 +29,15 @@ public class MainLevelGame : NetworkBehaviour
         new Vector3(0, 0, -4)
     };
 
-    //private int WrapInt(int curValue, int increment, int max)
-    //{
-    //    int toReturn = curValue + increment;
-    //    if (toReturn > max)
-    //    {
-    //        toReturn = 0;
-    //    }
-    //    return toReturn;
-    //}
+    private int WrapInt(int curValue, int increment, int max)
+    {
+        int toReturn = curValue + increment;
+        if (toReturn > max)
+        {
+            toReturn = 0;
+        }
+        return toReturn;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -48,11 +48,17 @@ public class MainLevelGame : NetworkBehaviour
         {
             SpawnPlayers();
         }
-        //else
-        //{
-        //    SpawnPlayers(PlayerDefault);
-        //    Debug.Log("Clients Spawn");
-        //}
+    }
+
+    private Color NextColor()
+    {
+        Color newColor = playerColors[colorIndex];
+        colorIndex += 1;
+        if (colorIndex > playerColors.Length - 1)
+        {
+            colorIndex = 0;
+        }
+        return newColor;
     }
 
     private Vector3 NextPosition()
@@ -66,54 +72,38 @@ public class MainLevelGame : NetworkBehaviour
         return pos;
     }
 
-    //private Color NextColor()
-    //{
-    //    Color newColor = playerColors[colorIndex];
-    //    colorIndex = WrapInt(colorIndex, 1, playerColors.Length);
-    //    return newColor;
-    //}
-
-
-    private Color NextColor()
-    {
-        Color newColor = playerColors[colorIndex];
-        colorIndex += 1;
-        if (colorIndex > playerColors.Length - 1)
-        {
-            colorIndex = 0;
-        }
-        return newColor;
-    }
-
     private void SpawnPlayers()
     {
         foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
         {
-            Player playerSpawn;
             //Debug.Log("Into Spawning");
             //Player playerSpawn = Instantiate(playerPrefab, NextPosition(), Quaternion.identity);
             //playerSpawn.playerColorNetVar.Value = NextColor();
             //playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-            if (IsHost && clientId == NetworkManager.LocalClientId)
-            {
-                Debug.Log("Host Spawn");
-                playerSpawn = Instantiate(PlayerHost, NextPosition(), Quaternion.identity);
-            }
-            else
-            {
-                Debug.Log("Client Spawn");
-                playerSpawn = Instantiate(PlayerDefault, NextPosition(), Quaternion.identity);
-            }
-            playerSpawn.playerColorNetVar.Value = NextColor();
-            playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-            //Player prefab = PlayerDefault;
-            //if (clientId == NetworkManager.LocalClientId)
+
+            //Player playerSpawn;
+            //if (IsHost && clientId == NetworkManager.LocalClientId)
             //{
-            //    prefab = PlayerHost;
+            //    Debug.Log("Host Spawn");
+            //    playerSpawn = Instantiate(PlayerHost, NextPosition(), Quaternion.identity);
             //}
-            //Player playerSpawn = Instantiate(prefab, NextPosition(), Quaternion.identity);
-            //playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-            //playerSpawn.PlayerColor.Value = NextColor();
+            //else
+            //{
+            //    Debug.Log("Client Spawn");
+            //    playerSpawn = Instantiate(PlayerDefault, NextPosition(), Quaternion.identity);
+            //}
+
+            Player prefab = PlayerDefault;
+            if (clientId == NetworkManager.LocalClientId)
+            {
+                prefab = PlayerHost;
+            }
+            Player playerSpawn = Instantiate(
+                prefab,
+                NextPosition(),
+                Quaternion.identity);
+            playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+            playerSpawn.PlayerColor.Value = NextColor();
         }
     }
 }

@@ -5,22 +5,42 @@ using Unity.Netcode;
 
 public class Player : NetworkBehaviour
 {
+    public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.red);
+
     public float movementSpeed = 50f;
     public float rotationSpeed = 130f;
-    public NetworkVariable<Color> playerColorNetVar = new NetworkVariable<Color>(Color.red);
     public float maxDistance = 25.0f;
 
     private Camera playerCamera;
     private GameObject playerBody;
 
-    private void Start()
+    private void NetworkInit()
     {
+        playerBody = transform.Find("PlayerBody").gameObject;
+
         playerCamera = transform.Find("Camera").GetComponent<Camera>();
         playerCamera.enabled = IsOwner;
         playerCamera.GetComponent<AudioListener>().enabled = IsOwner;
 
-        playerBody = transform.Find("PlayerBody").gameObject;
-        ApplyColor();
+        ApplyPlayerColor();
+        PlayerColor.OnValueChanged += OnPlayerColorChanged;
+    }
+
+    private void Awake()
+    {
+        NetworkHelper.Log(this, "Awake");
+    }
+
+    private void Start()
+    {
+        NetworkHelper.Log(this, "Start");
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        NetworkHelper.Log(this, "OnNetworkSpawn");
+        NetworkInit();
+        base.OnNetworkSpawn();
     }
 
     private void Update()
@@ -29,6 +49,11 @@ public class Player : NetworkBehaviour
         {
             OwnerHandleInput();
         }
+    }
+
+    public void OnPlayerColorChanged(Color previous, Color current)
+    {
+        ApplyPlayerColor();
     }
 
     public void OwnerHandleInput()
@@ -40,12 +65,6 @@ public class Player : NetworkBehaviour
             MoveServerRpc(movement, rotation);
         }
 
-    }
-
-    private void ApplyColor()
-    {
-        playerBody.GetComponent<MeshRenderer>().material.color = playerColorNetVar.Value;
-        //Debug.Log($" {playerColorNetVar.Value}");
     }
 
     [ServerRpc(RequireOwnership = true)]
@@ -105,12 +124,19 @@ public class Player : NetworkBehaviour
     {
         float minX = -maxDistance;
         float maxX = maxDistance;
-        float minY = -maxDistance;
-        float maxY = maxDistance;
+        float minZ = -maxDistance;
+        float maxZ = maxDistance;
 
         //Debug.Log($"{maxDistance}");
-        //Debug.Log($"{position.x}, {position.y}");
-        return position.x >= minX && position.x <= maxX && position.y >= minY && position.y <= maxY;
+        Debug.Log($"{position.x}, {position.z}");
+        return position.x >= minX && position.x <= maxX && position.z >= minZ && position.z <= maxZ;
+    }
+
+    private void ApplyPlayerColor()
+    {
+        NetworkHelper.Log(this, $"Applying color {PlayerColor.Value}");
+        playerBody.GetComponent<MeshRenderer>().material.color = PlayerColor.Value;
+        //Debug.Log($" {PlayerColor.Value}");
     }
 
 }
