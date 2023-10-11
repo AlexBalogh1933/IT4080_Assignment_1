@@ -102,7 +102,7 @@ public class MainLevelGame : NetworkBehaviour
                 prefab,
                 NextPosition(),
                 Quaternion.identity);
-            playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+            playerSpawn.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
             playerSpawn.PlayerColor.Value = NextColor();
         }
     }

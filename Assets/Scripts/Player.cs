@@ -6,6 +6,9 @@ using Unity.Netcode;
 public class Player : NetworkBehaviour
 {
     public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.red);
+    public NetworkVariable<int> ScoreNetVar = new NetworkVariable<int>(0);
+
+    public BulletSpawner bulletSpawner;
 
     public float movementSpeed = 50f;
     public float rotationSpeed = 130f;
@@ -24,6 +27,11 @@ public class Player : NetworkBehaviour
 
         ApplyPlayerColor();
         PlayerColor.OnValueChanged += OnPlayerColorChanged;
+
+        if (IsClient)
+        {
+            ScoreNetVar.OnValueChanged += ClientOnScoreValueChanged;
+        }
     }
 
     private void Awake()
@@ -36,6 +44,19 @@ public class Player : NetworkBehaviour
         NetworkHelper.Log(this, "Start");
     }
 
+    private void Update()
+    {
+        if (IsOwner)
+        {
+            OwnerHandleInput();
+            if (Input.GetButtonDown("Fire1"))
+            {
+                NetworkHelper.Log("Requesting Fire");
+                bulletSpawner.FireServerRpc();
+            }
+        }
+    }
+
     public override void OnNetworkSpawn()
     {
         NetworkHelper.Log(this, "OnNetworkSpawn");
@@ -43,12 +64,36 @@ public class Player : NetworkBehaviour
         base.OnNetworkSpawn();
     }
 
-    private void Update()
+    private void ClientOnScoreValueChanged(int old, int current)
     {
         if (IsOwner)
         {
-            OwnerHandleInput();
+            NetworkHelper.Log(this, $"My score is {ScoreNetVar.Value}");
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (IsServer)
+        {
+            ServerHandleCollision(collision);
+        }
+    }
+
+    private void ServerHandleCollision(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("bullet"))
+        {
+            ulong ownerId = collision.gameObject.GetComponent<NetworkObject>().OwnerClientId;
+            NetworkHelper.Log(this,
+                $"Hit by {collision.gameObject.name} " +
+                $"owned by {ownerId}");
+            Player other = NetworkManager.Singleton.ConnectedClients[ownerId].PlayerObject.GetComponent<Player>();
+            other.ScoreNetVar.Value += 1;
+            Destroy(collision.gameObject);
+
+        }
+        
     }
 
     public void OnPlayerColorChanged(Color previous, Color current)
@@ -88,7 +133,6 @@ public class Player : NetworkBehaviour
                 Debug.Log($"Too Far");
             }
         }
-        
     }
 
     private Vector3 CalcRotation()
@@ -128,7 +172,7 @@ public class Player : NetworkBehaviour
         float maxZ = maxDistance;
 
         //Debug.Log($"{maxDistance}");
-        Debug.Log($"{position.x}, {position.z}");
+        //Debug.Log($"{position.x}, {position.z}");
         return position.x >= minX && position.x <= maxX && position.z >= minZ && position.z <= maxZ;
     }
 
