@@ -10,7 +10,8 @@ public class Player : NetworkBehaviour
 
     public BulletSpawner bulletSpawner;
 
-    public float movementSpeed = 50f;
+    public NetworkVariable<float> clientMovementSpeed = new NetworkVariable<float>(50f);
+    //public float movementSpeed = 50f;
     public float rotationSpeed = 130f;
     public float maxDistance = 25.0f;
 
@@ -103,9 +104,12 @@ public class Player : NetworkBehaviour
             Player other = NetworkManager.Singleton.ConnectedClients[ownerId].PlayerObject.GetComponent<Player>();
             other.ScoreNetVar.Value += 1;
             Destroy(collision.gameObject);
-
         }
-        
+    }
+
+    public void ApplySpeedChange(float newSpeed)
+    {
+        clientMovementSpeed.Value = newSpeed;
     }
 
     public void OnPlayerColorChanged(Color previous, Color current)
@@ -121,7 +125,6 @@ public class Player : NetworkBehaviour
         {
             MoveServerRpc(movement, rotation);
         }
-
     }
 
     [ServerRpc(RequireOwnership = true)]
@@ -161,7 +164,6 @@ public class Player : NetworkBehaviour
 
     private Vector3 CalcMovement()
     {
-        
         bool isShiftKeyDown = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         float x_move = 0.0f;
         float z_move = Input.GetAxis("Vertical");
@@ -172,7 +174,13 @@ public class Player : NetworkBehaviour
         }
 
         Vector3 moveVect = new Vector3(x_move, 0, z_move);
-        moveVect *= movementSpeed * Time.deltaTime;
+        moveVect *= clientMovementSpeed.Value * Time.deltaTime;
+
+        // Below was for testing purposes. Floods Console but helped find my issue. 
+        //if (IsClient && OwnerClientId == NetworkManager.LocalClientId)
+        //{
+        //    Debug.Log($"This is the movement speed of player {NetworkManager.LocalClientId} is {clientMovementSpeed.Value}");
+        //}
 
         return moveVect;
     }

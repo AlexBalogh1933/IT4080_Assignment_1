@@ -8,14 +8,15 @@ public class PowerUpSpeed : BasePowerUp
 
     protected override bool ApplyToPlayer(Player thePickerUpper)
     {
-        if (thePickerUpper.movementSpeed <= newMovementSpeed)
+        if (thePickerUpper.clientMovementSpeed.Value <= newMovementSpeed)
         {
             return false;
         }
         else
         {
-            thePickerUpper.movementSpeed = newMovementSpeed;
-            Debug.Log($"Adding new movement speed to player {NetworkManager.LocalClientId}");
+            thePickerUpper.ApplySpeedChange(newMovementSpeed);
+            //Debug.Log($"Adding new movement speed to player {thePickerUpper.OwnerClientId}");
+            //Debug.Log($"New speed {thePickerUpper.clientMovementSpeed.Value}");
             return true;
         }
     }
