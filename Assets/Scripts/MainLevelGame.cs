@@ -11,14 +11,7 @@ public class MainLevelGame : NetworkBehaviour
     //public Player playerPrefab;
     public Camera mainlevelCamera;
 
-    private int colorIndex = 0;
-    private Color[] playerColors = new Color[]
-    {
-        Color.blue,
-        Color.green,
-        Color.yellow,
-        Color.magenta,
-    };
+    private NetworkedPlayers networkedPlayers;
 
     private int positionIndex = 0;
     private Vector3[] startPositions = new Vector3[]
@@ -44,21 +37,14 @@ public class MainLevelGame : NetworkBehaviour
     {
         mainlevelCamera.enabled = !IsClient;
         mainlevelCamera.GetComponent<AudioListener>().enabled = !IsClient;
+
+        networkedPlayers = GameObject.Find("NetworkedPlayers").GetComponent<NetworkedPlayers>();
+        NetworkHelper.Log($"Player = {networkedPlayers.allNetPlayers.Count}");
+
         if (IsServer)
         {
             SpawnPlayers();
         }
-    }
-
-    private Color NextColor()
-    {
-        Color newColor = playerColors[colorIndex];
-        colorIndex += 1;
-        if (colorIndex > playerColors.Length - 1)
-        {
-            colorIndex = 0;
-        }
-        return newColor;
     }
 
     private Vector3 NextPosition()
@@ -74,27 +60,10 @@ public class MainLevelGame : NetworkBehaviour
 
     private void SpawnPlayers()
     {
-        foreach (ulong clientId in NetworkManager.ConnectedClientsIds)
+        foreach (NetworkPlayerInfo info in networkedPlayers.allNetPlayers)
         {
-            //Debug.Log("Into Spawning");
-            //Player playerSpawn = Instantiate(playerPrefab, NextPosition(), Quaternion.identity);
-            //playerSpawn.playerColorNetVar.Value = NextColor();
-            //playerSpawn.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
-
-            //Player playerSpawn;
-            //if (IsHost && clientId == NetworkManager.LocalClientId)
-            //{
-            //    Debug.Log("Host Spawn");
-            //    playerSpawn = Instantiate(PlayerHost, NextPosition(), Quaternion.identity);
-            //}
-            //else
-            //{
-            //    Debug.Log("Client Spawn");
-            //    playerSpawn = Instantiate(PlayerDefault, NextPosition(), Quaternion.identity);
-            //}
-
             Player prefab = PlayerDefault;
-            if (clientId == NetworkManager.LocalClientId)
+            if (info.clientId == NetworkManager.LocalClientId)
             {
                 prefab = PlayerHost;
             }
@@ -102,8 +71,8 @@ public class MainLevelGame : NetworkBehaviour
                 prefab,
                 NextPosition(),
                 Quaternion.identity);
-            playerSpawn.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
-            playerSpawn.PlayerColor.Value = NextColor();
+            playerSpawn.GetComponent<NetworkObject>().SpawnAsPlayerObject(info.clientId);
+            playerSpawn.PlayerColor.Value = info.color;
         }
     }
 }
