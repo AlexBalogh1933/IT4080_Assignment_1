@@ -8,6 +8,8 @@ public class Lobby : NetworkBehaviour
     public LobbyUi lobbyUi;
     public NetworkedPlayers networkedPlayers;
 
+    private const int MaxNameLength = 20;
+
     void Start()
     {
         if (IsServer)
@@ -125,7 +127,17 @@ public class Lobby : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void UpdatePlayerNameServerRpc(string newValue, ServerRpcParams rpcParams = default)
     {
-        networkedPlayers.UpdatePlayerName(rpcParams.Receive.SenderClientId, newValue);
+        ulong clientId = rpcParams.Receive.SenderClientId;
+
+        if (newValue.Length <= MaxNameLength)
+        {
+            networkedPlayers.UpdatePlayerName(rpcParams.Receive.SenderClientId, newValue);
+        }
+        else
+        {
+            string originalName = $"Player {clientId}";
+            networkedPlayers.UpdatePlayerName(rpcParams.Receive.SenderClientId, originalName);
+        }
     }
 
 }
