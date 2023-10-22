@@ -12,14 +12,17 @@ public class Lobby : NetworkBehaviour
     {
         if (IsServer)
         {
-            networkedPlayers.allNetPlayers.OnListChanged += ServerOnNetworkedPlayers;
             ServerPopulateCards();
+            networkedPlayers.allNetPlayers.OnListChanged += ServerOnNetworkedPlayers;
+            lobbyUi.ShowStart(true);
+        } 
+        else
+        {
+            ClientPopulateCards();
+            networkedPlayers.allNetPlayers.OnListChanged += ClientNetPlayerChanged;
+            lobbyUi.ShowStart(false);
+            lobbyUi.OnReadyToggled += ClientOnReadyToggled;
         }
-    }
-
-    private void ServerOnNetworkedPlayers(NetworkListEvent<NetworkPlayerInfo> changeEvent)
-    {
-        ServerPopulateCards();
     }
 
     private void ServerPopulateCards()
@@ -30,8 +33,52 @@ public class Lobby : NetworkBehaviour
             PlayerCard pc = lobbyUi.playerCards.AddCard("Some player");
             pc.ready = info.ready;
             pc.clientId = info.clientId;
+            pc.color = info.color;
+            if (info.clientId == NetworkManager.LocalClientId)
+            {
+                pc.ShowKick(false);
+            }
+            else
+            {
+                pc.ShowKick(true);
+            }
             pc.UpdateDisplay();
         }
+    }
+
+    private void ClientPopulateCards()
+    {
+        lobbyUi.playerCards.Clear();
+        foreach (NetworkPlayerInfo info in networkedPlayers.allNetPlayers)
+        {
+            PlayerCard pc = lobbyUi.playerCards.AddCard("Some player");
+            pc.ready = info.ready;
+            pc.clientId = info.clientId;
+            pc.color = info.color;
+            pc.ShowKick(false);
+            pc.UpdateDisplay();
+        }
+    }
+
+    private void ClientOnReadyToggled(bool newValue)
+    { 
+        UpdateReadyServerRpc(newValue);
+    }
+
+    private void ServerOnNetworkedPlayers(NetworkListEvent<NetworkPlayerInfo> changeEvent)
+    {
+        ServerPopulateCards();
+    }
+
+    private void ClientNetPlayerChanged(NetworkListEvent<NetworkPlayerInfo> changeEvent)
+    {
+        ClientPopulateCards();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdateReadyServerRpc(bool newValue, ServerRpcParams rpcParams = default)
+    {
+        networkedPlayers.UpdateReady(rpcParams.Receive.SenderClientId, newValue);
     }
 
 }
