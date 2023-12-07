@@ -38,22 +38,6 @@ public class NetworkHelper : MonoBehaviour
         {
             GUILayout.Label($"ClientId = {netMgr.LocalClientId}");
         }
-        //string mode = netMgr.IsHost ?
-        //    "Host" : netMgr.IsServer ? "Server" : "Client";
-
-        // Makes the text viewable with my background
-        // {
-        //if (labelStyle == null)
-        //{
-        //    labelStyle = new GUIStyle(GUI.skin.label);
-        //    labelStyle.normal.textColor = Color.black;
-        //    labelStyle.hover.textColor = Color.black;
-        //}
-
-        //if (GUILayout.Button($"Shutdown {mode}")) netMgr.Shutdown();
-        //GUILayout.Label($"Transport: {transportTypeName} [{serverPort}]", labelStyle);
-        //GUILayout.Label("Mode: " + mode, labelStyle);
-        //}
     }
 
     public static void GUILayoutNetworkControls()
@@ -87,18 +71,11 @@ public class NetworkHelper : MonoBehaviour
         return type;
     }
 
-    // NetworkHelper.Log
-    // [client 2] hello world
-    // [server 0] hello world
-    // [host 0] hello world
     public static void Log(string msg)
     {
         Debug.Log($"[{GetNetworkMode()} {netMgr.LocalClientId}]:  {msg}");
     }
 
-    //Player.cs
-    // NetworkHelper.Log(self, "this is my color {netvar.Value}");
-    // [client 2][Player 4] this is my color ...
     public static void Log(NetworkBehaviour what, string msg)
     {
         ulong ownerId = what.GetComponent<NetworkObject>().OwnerClientId;

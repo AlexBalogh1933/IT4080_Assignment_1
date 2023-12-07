@@ -8,18 +8,27 @@ public class MainLevelGame : NetworkBehaviour
 
     public Player PlayerHost;
     public Player PlayerDefault;
+    //public GameObject healthPickups;
     //public Player playerPrefab;
     public Camera mainlevelCamera;
 
     private NetworkedPlayers networkedPlayers;
 
+    //private int hpPositionIndex = 0;
+    //private Vector3[] healthPickupPositions = new Vector3[]
+    //{
+    //    new Vector3(-21f, 1.25f, -47f),
+    //    new Vector3(-11f, 1.25f, -30f),
+    //    new Vector3(-41f, 1.25f, -38f)
+    //};
+
     private int positionIndex = 0;
     private Vector3[] startPositions = new Vector3[]
     {
-        new Vector3(4, 0, 0),
-        new Vector3(-4, 0, 0),
-        new Vector3(0, 0, 4),
-        new Vector3(0, 0, -4)
+        new Vector3(-120f, 0f, 120f),
+        new Vector3(-120f, 0f, -120f),
+        new Vector3(120f, 0f, -120f),
+        new Vector3(120f, 0f, 120f)
     };
 
     private int WrapInt(int curValue, int increment, int max)
@@ -58,6 +67,17 @@ public class MainLevelGame : NetworkBehaviour
         return pos;
     }
 
+    //private Vector3 HPPickupNextPosition()
+    //{
+    //    Vector3 pos = startPositions[hpPositionIndex];
+    //    hpPositionIndex += 1;
+    //    if (hpPositionIndex > healthPickupPositions.Length - 1)
+    //    {
+    //        hpPositionIndex = 0;
+    //    }
+    //    return pos;
+    //}
+
     private void SpawnPlayers()
     {
         foreach (NetworkPlayerInfo info in networkedPlayers.allNetPlayers)
@@ -75,4 +95,13 @@ public class MainLevelGame : NetworkBehaviour
             playerSpawn.PlayerColor.Value = info.color;
         }
     }
+
+    //private void SpawnHealthPickUps()
+    //{
+    //    foreach (Vector3 hpSpawnLoc in healthPickupPositions)
+    //    {
+    //        GameObject hpPickup = Instantiate(healthPickups, HPPickupNextPosition(), Quaternion.identity);
+    //        hpPickup.GetComponent<NetworkObject>().Spawn();
+    //    }
+    //}
 }

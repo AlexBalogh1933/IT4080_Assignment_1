@@ -6,6 +6,7 @@ TagManager:
   tags:
   - bullet
   - power_up
+  - Wall
   layers:
   - Default
   - TransparentFX

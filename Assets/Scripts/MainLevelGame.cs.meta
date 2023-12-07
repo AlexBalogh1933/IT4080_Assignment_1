@@ -4,8 +4,9 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - PlayerHost: {fileID: 2709878023548559336, guid: 5e4babc83ec0e5b40a563a9d62b9634c, type: 3}
+  - PlayerHost: {fileID: 5097906678310120700, guid: 5e4babc83ec0e5b40a563a9d62b9634c, type: 3}
   - PlayerDefault: {fileID: 4245003694356034516, guid: e91f915e7eba8fa45855868d9a0abe33, type: 3}
+  - healthPickups: {fileID: 7079181001964436460, guid: 2be3f0c8f9f4bff4294c758bf1991b9d, type: 3}
   - mainlevelCamera: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}

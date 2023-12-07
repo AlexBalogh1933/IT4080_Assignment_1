@@ -7,16 +7,19 @@ public class Player : NetworkBehaviour
 {
     public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.red);
     public NetworkVariable<int> ScoreNetVar = new NetworkVariable<int>(0);
+    public NetworkVariable<int> playerHP = new NetworkVariable<int>();
 
     public BulletSpawner bulletSpawner;
 
-    public NetworkVariable<float> clientMovementSpeed = new NetworkVariable<float>(50f);
-    //public float movementSpeed = 50f;
+    //public NetworkVariable<float> clientMovementSpeed = new NetworkVariable<float>(10f);
+    public float movementSpeed = 10f;
     public float rotationSpeed = 130f;
-    public float maxDistance = 25.0f;
+    //public float maxDistance = 25.0f;
 
     private Camera playerCamera;
     private GameObject playerBody;
+
+    private CharacterController characterController;
 
     private void NetworkInit()
     {
@@ -29,10 +32,10 @@ public class Player : NetworkBehaviour
         ApplyPlayerColor();
         PlayerColor.OnValueChanged += OnPlayerColorChanged;
 
-        if (IsClient)
-        {
-            ScoreNetVar.OnValueChanged += ClientOnScoreValueChanged;
-        }
+        //if (IsClient)
+        //{
+        //    ScoreNetVar.OnValueChanged += ClientOnScoreValueChanged;
+        //}
     }
 
     private void Awake()
@@ -43,6 +46,7 @@ public class Player : NetworkBehaviour
     private void Start()
     {
         NetworkHelper.Log(this, "Start");
+        characterController = GetComponent<CharacterController>();
     }
 
     private void Update()
@@ -52,7 +56,7 @@ public class Player : NetworkBehaviour
             OwnerHandleInput();
             if (Input.GetButtonDown("Fire1"))
             {
-                NetworkHelper.Log("Requesting Fire");
+                //NetworkHelper.Log("Requesting Fire");
                 bulletSpawner.FireServerRpc();
             }
         }
@@ -63,15 +67,16 @@ public class Player : NetworkBehaviour
         NetworkHelper.Log(this, "OnNetworkSpawn");
         NetworkInit();
         base.OnNetworkSpawn();
+        playerHP.Value = 100;
     }
 
-    private void ClientOnScoreValueChanged(int old, int current)
-    {
-        if (IsOwner)
-        {
-            NetworkHelper.Log(this, $"My score is {ScoreNetVar.Value}");
-        }
-    }
+    //private void ClientOnScoreValueChanged(int old, int current)
+    //{
+    //    if (IsOwner)
+    //    {
+    //        NetworkHelper.Log(this, $"My score is {ScoreNetVar.Value}");
+    //    }
+    //}
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -90,6 +95,12 @@ public class Player : NetworkBehaviour
                 other.GetComponent<BasePowerUp>().ServerPickUp(this);
             }
         }
+        //else if (other.GetComponent<HealthPickup>())
+        //{
+        //    Debug.Log("Player HP+");
+        //    playerHP.Value += 50;
+        //}
+
     }
 
 
@@ -98,18 +109,23 @@ public class Player : NetworkBehaviour
         if (collision.gameObject.CompareTag("bullet"))
         {
             ulong ownerId = collision.gameObject.GetComponent<NetworkObject>().OwnerClientId;
-            NetworkHelper.Log(this,
-                $"Hit by {collision.gameObject.name} " +
-                $"owned by {ownerId}");
+            //NetworkHelper.Log(this,
+            //    $"Hit by {collision.gameObject.name} " +
+            //    $"owned by {ownerId}");
             Player other = NetworkManager.Singleton.ConnectedClients[ownerId].PlayerObject.GetComponent<Player>();
-            other.ScoreNetVar.Value += 1;
+            //other.ScoreNetVar.Value += 1;
+            //NetworkManager.Singleton.ConnectedClients[other.GetComponent<NetworkObject>().OwnerClientId]
+                //.PlayerObject.GetComponent<NetworkPlayerData>().score.Value += 1;
+            Debug.Log("Player dmg");
+            playerHP.Value -= 10;
             Destroy(collision.gameObject);
         }
     }
 
     public void ApplySpeedChange(float newSpeed)
     {
-        clientMovementSpeed.Value = newSpeed;
+        movementSpeed = newSpeed;
+        //clientMovementSpeed.Value = newSpeed;
     }
 
     public void OnPlayerColorChanged(Color previous, Color current)
@@ -137,17 +153,10 @@ public class Player : NetworkBehaviour
         }
         else if (IsClient)
         {
-            Vector3 newPosition = transform.position + movement;
-            if (WithinClientBorder(newPosition))
-            {
-                transform.Translate(movement);
-                transform.Rotate(rotation);
-            }
-            else
-            {
-                Debug.Log($"Too Far");
-            }
+            transform.Translate(movement);
+            transform.Rotate(rotation);
         }
+
     }
 
     private Vector3 CalcRotation()
@@ -174,7 +183,8 @@ public class Player : NetworkBehaviour
         }
 
         Vector3 moveVect = new Vector3(x_move, 0, z_move);
-        moveVect *= clientMovementSpeed.Value * Time.deltaTime;
+        moveVect *= movementSpeed * Time.deltaTime;
+        //moveVect *= clientMovementSpeed.Value * Time.deltaTime;
 
         // Below was for testing purposes. Floods Console but helped find my issue. 
         //if (IsClient && OwnerClientId == NetworkManager.LocalClientId)
@@ -185,17 +195,17 @@ public class Player : NetworkBehaviour
         return moveVect;
     }
 
-    private bool WithinClientBorder(Vector3 position)
-    {
-        float minX = -maxDistance;
-        float maxX = maxDistance;
-        float minZ = -maxDistance;
-        float maxZ = maxDistance;
+    //private bool WithinClientBorder(Vector3 position)
+    //{
+    //    float minX = -maxDistance;
+    //    float maxX = maxDistance;
+    //    float minZ = -maxDistance;
+    //    float maxZ = maxDistance;
 
-        //Debug.Log($"{maxDistance}");
-        //Debug.Log($"{position.x}, {position.z}");
-        return position.x >= minX && position.x <= maxX && position.z >= minZ && position.z <= maxZ;
-    }
+    //    //Debug.Log($"{maxDistance}");
+    //    //Debug.Log($"{position.x}, {position.z}");
+    //    return position.x >= minX && position.x <= maxX && position.z >= minZ && position.z <= maxZ;
+    //}
 
     private void ApplyPlayerColor()
     {

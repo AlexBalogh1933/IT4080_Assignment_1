@@ -10,6 +10,7 @@ public class PowerUpFireRate1 : BasePowerUp
     {
         if (thePickerUpper.bulletSpawner.timeBetweenBullets <= timeBetweenBullets)
         {
+            Debug.Log("Changed your fire rate");
             return false;
         }
         else
